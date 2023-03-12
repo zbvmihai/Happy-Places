@@ -17,4 +17,24 @@
         app:srcCompat="@drawable/ic_action_add_24dp"
         tools:ignore="ImageContrastCheck,ImageContrastCheck,RedundantDescriptionCheck" />
 
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvHappyPlaces"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone"
+        tools:visibility="gone"/>
+
+    <TextView
+        android:id="@+id/tvNoRecords"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:text="@string/no_happy_places_found_yet"
+        android:textColor="#0277BD"
+        android:textSize="16sp"
+        android:visibility="visible"
+        tools:ignore="TextContrastCheck"
+        tools:visibility="visible" />
+
+
 </FrameLayout>
