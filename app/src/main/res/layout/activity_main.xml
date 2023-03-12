@@ -13,6 +13,7 @@
         android:layout_gravity="bottom|end"
         android:layout_margin="@dimen/fab_margin"
         android:contentDescription="@string/add_button"
+        app:backgroundTint="@color/colorPrimary"
         app:srcCompat="@drawable/ic_action_add_24dp"
         tools:ignore="ImageContrastCheck,ImageContrastCheck,RedundantDescriptionCheck" />
 
