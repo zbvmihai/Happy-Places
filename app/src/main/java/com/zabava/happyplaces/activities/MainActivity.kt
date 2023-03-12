@@ -3,7 +3,9 @@ package com.zabava.happyplaces.activities
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import com.zabava.happyplaces.database.DatabaseHandler
 import com.zabava.happyplaces.databinding.ActivityMainBinding
+import com.zabava.happyplaces.models.HappyPlaceModel
 
 class MainActivity : AppCompatActivity() {
     private var binding: ActivityMainBinding? = null
@@ -16,5 +18,13 @@ class MainActivity : AppCompatActivity() {
             val intent = Intent(this, AddHappyPlaceActivity::class.java)
             startActivity(intent)
         }
+    }
+
+    private fun getHappyPlacesListFromLocalDB(){
+        val dbHandler = DatabaseHandler(this)
+        val getHappyPlaceList : ArrayList<HappyPlaceModel> = dbHandler.getHappyPlacesList()
+
+
+
     }
 }
