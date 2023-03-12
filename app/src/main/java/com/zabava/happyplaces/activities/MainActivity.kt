@@ -1,8 +1,10 @@
 package com.zabava.happyplaces.activities
 
+import android.app.Activity
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.zabava.happyplaces.adapters.HappyPlacesAdapter
@@ -10,6 +12,7 @@ import com.zabava.happyplaces.database.DatabaseHandler
 import com.zabava.happyplaces.databinding.ActivityMainBinding
 import com.zabava.happyplaces.models.HappyPlaceModel
 
+@Suppress("DEPRECATION")
 class MainActivity : AppCompatActivity() {
     private var binding: ActivityMainBinding? = null
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -20,7 +23,7 @@ class MainActivity : AppCompatActivity() {
         getHappyPlacesListFromLocalDB()
         binding?.fabAddHappyPlaces?.setOnClickListener {
             val intent = Intent(this, AddHappyPlaceActivity::class.java)
-            startActivity(intent)
+            startActivityForResult(intent, ADD_PLACE_ACTIVITY_REQUEST_CODE)
         }
     }
 
@@ -53,5 +56,21 @@ class MainActivity : AppCompatActivity() {
 
 
 
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+
+        if (requestCode == ADD_PLACE_ACTIVITY_REQUEST_CODE){
+            if (resultCode == Activity.RESULT_OK){
+                getHappyPlacesListFromLocalDB()
+            }
+        }else{
+            Log.e("Activity","Cancelled or Back pressed")
+        }
+    }
+
+    companion object {
+      var ADD_PLACE_ACTIVITY_REQUEST_CODE = 1
     }
 }
