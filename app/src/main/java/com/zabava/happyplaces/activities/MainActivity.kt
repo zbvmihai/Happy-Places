@@ -28,7 +28,8 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setupHappyPlacesRecyclerView(
-        happyPlaceList: ArrayList<HappyPlaceModel>){
+        happyPlaceList: ArrayList<HappyPlaceModel>
+    ) {
 
         binding?.rvHappyPlaces?.layoutManager =
             LinearLayoutManager(this)
@@ -37,40 +38,48 @@ class MainActivity : AppCompatActivity() {
         val placesAdapter = HappyPlacesAdapter(happyPlaceList)
         binding?.rvHappyPlaces?.adapter = placesAdapter
 
+        placesAdapter.setOnClickListener(object : HappyPlacesAdapter.OnClickListener {
+            override fun onClick(position: Int, model: HappyPlaceModel) {
+                val intent = Intent(this@MainActivity, HappyPlaceDetailActivity::class.java)
+                intent.putExtra(EXTRA_PLACE_DETAILS, model)
+                startActivity(intent)
+            }
+        })
+
     }
 
-    private fun getHappyPlacesListFromLocalDB(){
+    private fun getHappyPlacesListFromLocalDB() {
         val dbHandler = DatabaseHandler(this)
-        val getHappyPlaceList : ArrayList<HappyPlaceModel> = dbHandler.getHappyPlacesList()
+        val getHappyPlaceList: ArrayList<HappyPlaceModel> = dbHandler.getHappyPlacesList()
 
-        if (getHappyPlaceList.size > 0){
-            for (i in getHappyPlaceList){
-               binding?.rvHappyPlaces?.visibility = View.VISIBLE
+        if (getHappyPlaceList.size > 0) {
+            for (i in getHappyPlaceList) {
+                binding?.rvHappyPlaces?.visibility = View.VISIBLE
                 binding?.tvNoRecords?.visibility = View.GONE
                 setupHappyPlacesRecyclerView(happyPlaceList = getHappyPlaceList)
             }
-        }else{
+        } else {
             binding?.rvHappyPlaces?.visibility = View.GONE
             binding?.tvNoRecords?.visibility = View.VISIBLE
         }
 
-
-
     }
 
+    @Deprecated("Deprecated in Java")
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
 
-        if (requestCode == ADD_PLACE_ACTIVITY_REQUEST_CODE){
-            if (resultCode == Activity.RESULT_OK){
+        if (requestCode == ADD_PLACE_ACTIVITY_REQUEST_CODE) {
+            if (resultCode == Activity.RESULT_OK) {
                 getHappyPlacesListFromLocalDB()
             }
-        }else{
-            Log.e("Activity","Cancelled or Back pressed")
+        } else {
+            Log.e("Activity", "Cancelled or Back pressed")
         }
     }
 
     companion object {
-      var ADD_PLACE_ACTIVITY_REQUEST_CODE = 1
+        var ADD_PLACE_ACTIVITY_REQUEST_CODE = 1
+        var EXTRA_PLACE_DETAILS = "extra_place_details"
     }
 }

@@ -1,6 +1,5 @@
 package com.zabava.happyplaces.adapters
 
-
 import android.net.Uri
 import android.view.LayoutInflater
 import android.view.ViewGroup
@@ -10,6 +9,8 @@ import com.zabava.happyplaces.models.HappyPlaceModel
 
 class HappyPlacesAdapter(private var list: ArrayList<HappyPlaceModel>) :
     RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+
+    private var onClickListener: OnClickListener? = null
 
     class ViewHolder(binding: ItemHappyPlaceBinding) :
         RecyclerView.ViewHolder(binding.root) {
@@ -26,13 +27,23 @@ class HappyPlacesAdapter(private var list: ArrayList<HappyPlaceModel>) :
         )
     }
 
+    fun setOnClickListener(onClickListener: OnClickListener) {
+        this.onClickListener = onClickListener
+    }
+
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
-        val model = list[position]
+        val happyPlaceModel = list[position]
 
         if (holder is ViewHolder) {
-            holder.ivPlaceName.setImageURI(Uri.parse(model.image))
-            holder.tvTitle.text = model.title
-            holder.tvDescription.text = model.description
+            holder.ivPlaceName.setImageURI(Uri.parse(happyPlaceModel.image))
+            holder.tvTitle.text = happyPlaceModel.title
+            holder.tvDescription.text = happyPlaceModel.description
+
+            holder.itemView.setOnClickListener {
+                if (onClickListener != null) {
+                    onClickListener!!.onClick(position, happyPlaceModel)
+                }
+            }
         }
     }
 
@@ -40,4 +51,7 @@ class HappyPlacesAdapter(private var list: ArrayList<HappyPlaceModel>) :
         return list.size
     }
 
+    interface OnClickListener {
+        fun onClick(position: Int, model: HappyPlaceModel)
+    }
 }
