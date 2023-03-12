@@ -4,6 +4,8 @@ import android.app.Activity
 import android.app.AlertDialog
 import android.app.DatePickerDialog
 import android.content.ActivityNotFoundException
+import android.content.Context
+import android.content.ContextWrapper
 import android.content.Intent
 import android.graphics.Bitmap
 import android.net.Uri
@@ -18,7 +20,10 @@ import com.karumi.dexter.PermissionToken
 import com.karumi.dexter.listener.PermissionRequest
 import com.karumi.dexter.listener.multi.MultiplePermissionsListener
 import com.zabava.happyplaces.databinding.ActivityAddHappyPlaceBinding
+import java.io.File
+import java.io.FileOutputStream
 import java.io.IOException
+import java.io.OutputStream
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -165,6 +170,23 @@ class AddHappyPlaceActivity : AppCompatActivity() {
         }
     }
 
+    private fun saveImageToInternalStorage(image: Bitmap): Uri{
+        val wrapper = ContextWrapper(applicationContext)
+        var file = wrapper.getDir(IMAGE_DIRECTORY, Context.MODE_PRIVATE)
+        file = File(file, "${UUID.randomUUID()}.jpg")
+
+        try {
+            val stream : OutputStream = FileOutputStream(file)
+            image.compress(Bitmap.CompressFormat.JPEG,100,stream)
+            stream.flush()
+            stream.close()
+            Toast.makeText(this,"Image saved!",Toast.LENGTH_SHORT).show()
+        }catch (e: IOException){
+            e.printStackTrace()
+        }
+        return Uri.parse(file.absolutePath)
+    }
+
     @Deprecated("Deprecated in Java")
     public override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
@@ -175,6 +197,7 @@ class AddHappyPlaceActivity : AppCompatActivity() {
                     try {
                         val selectedImageBitmap = MediaStore.Images.Media
                             .getBitmap(this.contentResolver, contentURI)
+                        saveImageToInternalStorage(selectedImageBitmap)
                         binding?.ivPlaceImage?.setImageBitmap(selectedImageBitmap)
                     } catch (e: IOException) {
                         e.printStackTrace()
@@ -188,6 +211,7 @@ class AddHappyPlaceActivity : AppCompatActivity() {
             } else if (requestCode == CAMERA) {
                 val thumbnail: Bitmap = data!!.extras!!.get("data") as Bitmap
                 binding?.ivPlaceImage?.setImageBitmap(thumbnail)
+                saveImageToInternalStorage(thumbnail)
             }
         }
     }
@@ -195,6 +219,8 @@ class AddHappyPlaceActivity : AppCompatActivity() {
     companion object {
         private const val GALLERY = 1
         private const val CAMERA = 2
+        private const val IMAGE_DIRECTORY = "HappyPlacesImages"
+
 
     }
 }
