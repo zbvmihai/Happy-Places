@@ -11,4 +11,5 @@
     <string name="no_happy_places_found_yet">No Happy Places Found Yet. Kindly Add One!</string>
     <string name="image_content_description">image</string>
     <string name="button_update">Update</string>
+    <string name="google_maps_api_key">AIzaSyDTXX2u9BxY_I6e1n0TcEuW5Elio-Ll4NQ</string>
 </resources>

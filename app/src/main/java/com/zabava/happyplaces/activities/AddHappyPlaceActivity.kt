@@ -14,6 +14,10 @@ import android.os.Bundle
 import android.provider.MediaStore
 import android.provider.Settings
 import android.widget.Toast
+import com.google.android.libraries.places.api.Places
+import com.google.android.libraries.places.api.model.Place
+import com.google.android.libraries.places.widget.Autocomplete
+import com.google.android.libraries.places.widget.model.AutocompleteActivityMode
 import com.karumi.dexter.Dexter
 import com.karumi.dexter.MultiplePermissionsReport
 import com.karumi.dexter.PermissionToken
@@ -54,18 +58,44 @@ class AddHappyPlaceActivity : AppCompatActivity() {
         binding?.tbAddPlace?.setNavigationOnClickListener {
             finish()
         }
-        if (intent.hasExtra(MainActivity.EXTRA_PLACE_DETAILS)){
+
+        if (!Places.isInitialized()) {
+            Places.initialize(
+                this@AddHappyPlaceActivity,
+                resources.getString(R.string.google_maps_api_key)
+            )
+        }
+
+        if (intent.hasExtra(MainActivity.EXTRA_PLACE_DETAILS)) {
             mHappyPlaceDetails = intent.getSerializableExtra(
-                MainActivity.EXTRA_PLACE_DETAILS) as HappyPlaceModel
+                MainActivity.EXTRA_PLACE_DETAILS
+            ) as HappyPlaceModel
         }
 
         setDate()
         addPhoto()
         update()
 
-        binding?.btnSave?.setOnClickListener {
-        save()
+        binding?.etLocation?.setOnClickListener {
+            try {
+                val fields = listOf(
+                    Place.Field.ID,
+                    Place.Field.NAME,
+                    Place.Field.LAT_LNG,
+                    Place.Field.ADDRESS
+                )
+                val intent = Autocomplete.IntentBuilder(AutocompleteActivityMode.FULLSCREEN,fields)
+                    .build(this@AddHappyPlaceActivity)
+                startActivityForResult(intent, PLACE_AUTOCOMPLETE_REQUEST_CODE)
+            } catch (e: java.lang.Exception) {
+                e.printStackTrace()
+            }
         }
+
+        binding?.btnSave?.setOnClickListener {
+            save()
+        }
+
 
     }
 
@@ -104,7 +134,7 @@ class AddHappyPlaceActivity : AppCompatActivity() {
         }
     }
 
-    private fun update(){
+    private fun update() {
         if (mHappyPlaceDetails != null) {
             supportActionBar?.title = "Edit Happy Place"
 
@@ -123,18 +153,18 @@ class AddHappyPlaceActivity : AppCompatActivity() {
         }
     }
 
-    private fun save(){
+    private fun save() {
         if (binding?.etTitle?.text?.isEmpty()!!) {
             Toast.makeText(this, "Please enter a title", Toast.LENGTH_SHORT).show()
-        }else if (binding?.etDescription?.text?.isEmpty()!!) {
+        } else if (binding?.etDescription?.text?.isEmpty()!!) {
             Toast.makeText(this, "Please enter a Description", Toast.LENGTH_SHORT).show()
         } else if (binding?.etDate?.text?.isEmpty()!!) {
             Toast.makeText(this, "Please select a date", Toast.LENGTH_SHORT).show()
-        }else if (binding?.etLocation?.text?.isEmpty()!!) {
+        } else if (binding?.etLocation?.text?.isEmpty()!!) {
             Toast.makeText(this, "Please enter a location", Toast.LENGTH_SHORT).show()
-        }else if (saveImageToInternalStorage == null){
+        } else if (saveImageToInternalStorage == null) {
             Toast.makeText(this, "Please select an image", Toast.LENGTH_SHORT).show()
-        }else{
+        } else {
             val happyPlaceModel = HappyPlaceModel(
                 (if (mHappyPlaceDetails == null) 0 else mHappyPlaceDetails!!.id),
                 binding?.etTitle?.text.toString(),
@@ -143,21 +173,22 @@ class AddHappyPlaceActivity : AppCompatActivity() {
                 binding?.etDate?.text.toString(),
                 binding?.etLocation?.text.toString(),
                 mLatitude,
-                mLongitude)
+                mLongitude
+            )
             val dbHandler = DatabaseHandler(this)
 
-            if (mHappyPlaceDetails == null){
+            if (mHappyPlaceDetails == null) {
 
                 val addHappyPlace = dbHandler.addHappyPlace(happyPlaceModel)
 
-                if (addHappyPlace > 0){
+                if (addHappyPlace > 0) {
                     setResult(Activity.RESULT_OK)
                     finish()
                 }
-            }else{
+            } else {
                 val updateHappyPlace = dbHandler.updateHappyPlace(happyPlaceModel)
 
-                if (updateHappyPlace > 0){
+                if (updateHappyPlace > 0) {
                     setResult(Activity.RESULT_OK)
                     finish()
                 }
@@ -248,7 +279,7 @@ class AddHappyPlaceActivity : AppCompatActivity() {
             }.show()
     }
 
-    private fun updateDateInView(){
+    private fun updateDateInView() {
         val sdf = SimpleDateFormat("dd.MM.yyyy", Locale.getDefault())
         binding?.etDate?.setText(sdf.format(cal.time).toString())
     }
@@ -296,6 +327,11 @@ class AddHappyPlaceActivity : AppCompatActivity() {
                 val thumbnail: Bitmap = data!!.extras!!.get("data") as Bitmap
                 binding?.ivPlaceImage?.setImageBitmap(thumbnail)
                 saveImageToInternalStorage = saveImageToInternalStorage(thumbnail)
+            }else if(requestCode == PLACE_AUTOCOMPLETE_REQUEST_CODE){
+                val place: Place = Autocomplete.getPlaceFromIntent(data!!)
+                binding?.etLocation?.setText(place.address)
+                mLatitude = place.latLng!!.latitude
+                mLongitude = place.latLng!!.longitude
             }
         }
     }
@@ -304,6 +340,7 @@ class AddHappyPlaceActivity : AppCompatActivity() {
         private const val GALLERY = 1
         private const val CAMERA = 2
         private const val IMAGE_DIRECTORY = "HappyPlacesImages"
+        private const val PLACE_AUTOCOMPLETE_REQUEST_CODE = 3
 
 
     }
