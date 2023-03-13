@@ -1,6 +1,7 @@
 package com.zabava.happyplaces.adapters
 
 import android.app.Activity
+import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.view.LayoutInflater
@@ -8,11 +9,12 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.zabava.happyplaces.activities.AddHappyPlaceActivity
 import com.zabava.happyplaces.activities.MainActivity
+import com.zabava.happyplaces.database.DatabaseHandler
 import com.zabava.happyplaces.databinding.ItemHappyPlaceBinding
 import com.zabava.happyplaces.models.HappyPlaceModel
 
 
-class HappyPlacesAdapter(private var list: ArrayList<HappyPlaceModel>) :
+class HappyPlacesAdapter(private val context: Context, private var list: ArrayList<HappyPlaceModel>) :
     RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     private var onClickListener: OnClickListener? = null
@@ -52,8 +54,17 @@ class HappyPlacesAdapter(private var list: ArrayList<HappyPlaceModel>) :
         }
     }
 
+    fun removeAt(position: Int){
+        val dbHandler = DatabaseHandler(context)
+        val isDeleted = dbHandler.deleteHappyPlace(list[position])
+        if (isDeleted > 0){
+            list.removeAt(position)
+            notifyItemRemoved(position)
+        }
+    }
+
     fun notifyEditItem(activity: Activity, position: Int, requestCode: Int){
-        val intent = Intent(activity.applicationContext, AddHappyPlaceActivity::class.java)
+        val intent = Intent(context, AddHappyPlaceActivity::class.java)
         intent.putExtra(MainActivity.EXTRA_PLACE_DETAILS,list[position])
         activity.startActivityForResult(intent, requestCode)
         notifyItemChanged(position)

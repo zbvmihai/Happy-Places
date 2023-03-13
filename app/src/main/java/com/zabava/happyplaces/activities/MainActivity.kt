@@ -9,6 +9,7 @@ import android.view.View
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.zabava.happyplaces.activities.utils.SwipeToDeleteCallback
 import com.zabava.happyplaces.adapters.HappyPlacesAdapter
 import com.zabava.happyplaces.database.DatabaseHandler
 import com.zabava.happyplaces.databinding.ActivityMainBinding
@@ -38,7 +39,7 @@ class MainActivity : AppCompatActivity() {
             LinearLayoutManager(this)
         binding?.rvHappyPlaces?.setHasFixedSize(true)
 
-        val placesAdapter = HappyPlacesAdapter(happyPlaceList)
+        val placesAdapter = HappyPlacesAdapter(this,happyPlaceList)
         binding?.rvHappyPlaces?.adapter = placesAdapter
 
         placesAdapter.setOnClickListener(object : HappyPlacesAdapter.OnClickListener {
@@ -59,6 +60,18 @@ class MainActivity : AppCompatActivity() {
 
         val editItemTouchHelper = ItemTouchHelper(editSwipeHandler)
         editItemTouchHelper.attachToRecyclerView(binding?.rvHappyPlaces)
+
+        val deleteSwipeHandler = object : SwipeToDeleteCallback(this){
+            override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
+                val adapter = binding?.rvHappyPlaces?.adapter as HappyPlacesAdapter
+                adapter.removeAt(viewHolder.adapterPosition)
+
+                getHappyPlacesListFromLocalDB()
+            }
+        }
+
+        val deleteItemTouchHelper = ItemTouchHelper(deleteSwipeHandler)
+        deleteItemTouchHelper.attachToRecyclerView(binding?.rvHappyPlaces)
 
     }
 
