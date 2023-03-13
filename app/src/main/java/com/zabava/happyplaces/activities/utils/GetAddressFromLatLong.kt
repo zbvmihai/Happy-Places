@@ -1,0 +1,67 @@
+@file:Suppress("DEPRECATION")
+
+package com.zabava.happyplaces.activities.utils
+
+import android.content.Context
+import android.location.Address
+import android.location.Geocoder
+import android.os.AsyncTask
+import java.util.*
+
+
+class GetAddressFromLatLong(
+    context: Context,
+    private val latitude: Double,
+    private val longitude: Double
+) : AsyncTask<Void, String, String>() {
+    @Deprecated("Deprecated in Java")
+
+    private val geocoder: Geocoder = Geocoder(context, Locale.getDefault())
+    private lateinit var mAddressListener: AddressListener
+
+
+    override fun doInBackground(vararg params: Void?): String {
+        try {
+            val addressList: List<Address>? =
+                geocoder.getFromLocation(latitude, longitude, 1)
+
+            if (addressList != null &&addressList.isNotEmpty()){
+                val address: Address = addressList[0]
+                val sb = java.lang.StringBuilder()
+                for (i in 0..address.maxAddressLineIndex){
+                    sb.append(address.getAddressLine(i)).append(" ")
+                }
+                sb.deleteCharAt(sb.length-1)
+                return sb.toString()
+            }
+        }catch (e: java.lang.Exception){
+            e.printStackTrace()
+
+        }
+        return ""
+    }
+
+    override fun onPostExecute(resultString: String?) {
+
+        if (resultString == null){
+            mAddressListener.onError()
+        }else{
+            mAddressListener.onAddressFound(resultString)
+        }
+
+        super.onPostExecute(resultString)
+    }
+
+    fun setAddressListener(addressListener: AddressListener){
+        mAddressListener = addressListener
+    }
+
+    fun getAddress(){
+        execute()
+    }
+
+    interface AddressListener {
+        fun onAddressFound(address: String?)
+        fun onError()
+    }
+}

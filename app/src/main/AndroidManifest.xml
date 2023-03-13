@@ -7,6 +7,8 @@
         android:name="android.permission.WRITE_EXTERNAL_STORAGE"
         tools:ignore="ScopedStorage" />
     <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
 
     <application
         android:allowBackup="true"
@@ -23,7 +25,8 @@
             android:exported="false"
             android:label="HAPPY PLACE MAP"
             android:screenOrientation="portrait"
-            android:theme="@style/CustomNoActionBarTheme">
+            android:theme="@style/CustomNoActionBarTheme"
+            tools:ignore="LockedOrientationActivity">
             <meta-data
                 android:name="android.app.lib_name"
                 android:value="" />
