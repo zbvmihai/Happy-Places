@@ -13,7 +13,7 @@ import com.zabava.happyplaces.adapters.HappyPlacesAdapter
 import com.zabava.happyplaces.database.DatabaseHandler
 import com.zabava.happyplaces.databinding.ActivityMainBinding
 import com.zabava.happyplaces.models.HappyPlaceModel
-import pl.kitek.rvswipetodelete.SwipeToEditCallback
+import com.zabava.happyplaces.activities.utils.SwipeToEditCallback
 
 @Suppress("DEPRECATION")
 class MainActivity : AppCompatActivity() {
