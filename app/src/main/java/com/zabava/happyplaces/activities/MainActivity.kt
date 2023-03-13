@@ -6,11 +6,14 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.view.View
+import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.zabava.happyplaces.adapters.HappyPlacesAdapter
 import com.zabava.happyplaces.database.DatabaseHandler
 import com.zabava.happyplaces.databinding.ActivityMainBinding
 import com.zabava.happyplaces.models.HappyPlaceModel
+import pl.kitek.rvswipetodelete.SwipeToEditCallback
 
 @Suppress("DEPRECATION")
 class MainActivity : AppCompatActivity() {
@@ -45,6 +48,17 @@ class MainActivity : AppCompatActivity() {
                 startActivity(intent)
             }
         })
+
+        val editSwipeHandler = object : SwipeToEditCallback(this){
+            override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
+                val adapter = binding?.rvHappyPlaces?.adapter as HappyPlacesAdapter
+                adapter.notifyEditItem(this@MainActivity,viewHolder.adapterPosition,
+                    ADD_PLACE_ACTIVITY_REQUEST_CODE)
+            }
+        }
+
+        val editItemTouchHelper = ItemTouchHelper(editSwipeHandler)
+        editItemTouchHelper.attachToRecyclerView(binding?.rvHappyPlaces)
 
     }
 

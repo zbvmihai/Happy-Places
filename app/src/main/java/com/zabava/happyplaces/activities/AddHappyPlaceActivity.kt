@@ -41,6 +41,8 @@ class AddHappyPlaceActivity : AppCompatActivity() {
     private var mLatitude: Double = 0.0
     private var mLongitude: Double = 0.0
 
+    private var mHappyPlaceDetails: HappyPlaceModel? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityAddHappyPlaceBinding.inflate(layoutInflater)
@@ -51,39 +53,65 @@ class AddHappyPlaceActivity : AppCompatActivity() {
         binding?.tbAddPlace?.setNavigationOnClickListener {
             finish()
         }
+        if (intent.hasExtra(MainActivity.EXTRA_PLACE_DETAILS)){
+            mHappyPlaceDetails = intent.getSerializableExtra(
+                MainActivity.EXTRA_PLACE_DETAILS) as HappyPlaceModel
+
+        }
 
         setDate()
         addPhoto()
 
+
+        if (mHappyPlaceDetails != null) {
+            supportActionBar?.title = "Edit Happy Place"
+
+            binding?.etTitle?.setText(mHappyPlaceDetails!!.title)
+            binding?.etDescription?.setText(mHappyPlaceDetails!!.description)
+            binding?.etDate?.setText(mHappyPlaceDetails!!.date)
+            binding?.etLocation?.setText(mHappyPlaceDetails!!.location)
+            mLatitude = mHappyPlaceDetails!!.latitude
+            mLongitude = mHappyPlaceDetails!!.longitude
+
+            saveImageToInternalStorage = Uri.parse(mHappyPlaceDetails!!.image)
+
+            binding?.ivPlaceImage?.setImageURI(saveImageToInternalStorage)
+
+            binding?.btnSave?.text = "UPDATE"
+        }
+
         binding?.btnSave?.setOnClickListener {
+        save()
+        }
+    }
 
-            if (binding?.etTitle?.text?.isEmpty()!!) {
-                Toast.makeText(this, "Please enter a title", Toast.LENGTH_SHORT).show()
-            }else if (binding?.etDescription?.text?.isEmpty()!!) {
-                Toast.makeText(this, "Please enter a Description", Toast.LENGTH_SHORT).show()
-            } else if (binding?.etDate?.text?.isEmpty()!!) {
-                Toast.makeText(this, "Please select a date", Toast.LENGTH_SHORT).show()
-            }else if (binding?.etLocation?.text?.isEmpty()!!) {
-                Toast.makeText(this, "Please enter a location", Toast.LENGTH_SHORT).show()
-            }else if (saveImageToInternalStorage == null){
-                Toast.makeText(this, "Please select an image", Toast.LENGTH_SHORT).show()
-            }else{
-                val happyPlaceModel = HappyPlaceModel(
-                    0,
-                    binding?.etTitle?.text.toString(),
-                    saveImageToInternalStorage.toString(),
-                    binding?.etDescription?.text.toString(),
-                    binding?.etDate?.text.toString(),
-                    binding?.etLocation?.text.toString(),
-                    mLatitude,
-                    mLongitude)
-                val dbHandler = DatabaseHandler(this)
-                val addHappyPlace = dbHandler.addHappyPlace(happyPlaceModel)
+    private fun save(){
+        if (binding?.etTitle?.text?.isEmpty()!!) {
+            Toast.makeText(this, "Please enter a title", Toast.LENGTH_SHORT).show()
+        }else if (binding?.etDescription?.text?.isEmpty()!!) {
+            Toast.makeText(this, "Please enter a Description", Toast.LENGTH_SHORT).show()
+        } else if (binding?.etDate?.text?.isEmpty()!!) {
+            Toast.makeText(this, "Please select a date", Toast.LENGTH_SHORT).show()
+        }else if (binding?.etLocation?.text?.isEmpty()!!) {
+            Toast.makeText(this, "Please enter a location", Toast.LENGTH_SHORT).show()
+        }else if (saveImageToInternalStorage == null){
+            Toast.makeText(this, "Please select an image", Toast.LENGTH_SHORT).show()
+        }else{
+            val happyPlaceModel = HappyPlaceModel(
+                0,
+                binding?.etTitle?.text.toString(),
+                saveImageToInternalStorage.toString(),
+                binding?.etDescription?.text.toString(),
+                binding?.etDate?.text.toString(),
+                binding?.etLocation?.text.toString(),
+                mLatitude,
+                mLongitude)
+            val dbHandler = DatabaseHandler(this)
+            val addHappyPlace = dbHandler.addHappyPlace(happyPlaceModel)
 
-                if (addHappyPlace > 0){
-                    setResult(Activity.RESULT_OK)
-                    finish()
-                }
+            if (addHappyPlace > 0){
+                setResult(Activity.RESULT_OK)
+                finish()
             }
         }
     }
@@ -186,14 +214,17 @@ class AddHappyPlaceActivity : AppCompatActivity() {
             }.show()
     }
 
+    private fun updateDateInView(){
+        val sdf = SimpleDateFormat("dd.MM.yyyy", Locale.getDefault())
+        binding?.etDate?.setText(sdf.format(cal.time).toString())
+    }
+
     private fun setDate() {
         dateSetListener = DatePickerDialog.OnDateSetListener { _, year, month, dayOfMonth ->
             cal.set(Calendar.YEAR, year)
             cal.set(Calendar.MONTH, month)
             cal.set(Calendar.DAY_OF_MONTH, dayOfMonth)
-
-            val sdf = SimpleDateFormat("dd.MM.yyyy", Locale.getDefault())
-            binding?.etDate?.setText(sdf.format(cal.time).toString())
+            updateDateInView()
         }
 
         binding?.etDate?.setOnClickListener {
